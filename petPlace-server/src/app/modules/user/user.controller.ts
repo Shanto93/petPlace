@@ -20,8 +20,8 @@ const getAllUsers = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const createPatient = catchAsync(async (req: Request, res: Response) => {
-  const result = await UserServices.createPatient(req);
+const createUser = catchAsync(async (req: Request, res: Response) => {
+  const result = await UserServices.createUser(req);
 
   sendResponse(res, {
     statusCode: 201,
@@ -31,16 +31,7 @@ const createPatient = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const createDoctor = catchAsync(async (req: Request, res: Response) => {
-  const result = await UserServices.createDoctor(req);
 
-  sendResponse(res, {
-    statusCode: 201,
-    success: true,
-    message: "Doctor created successfully",
-    data: result,
-  });
-});
 
 const createAdmin = catchAsync(async (req: Request, res: Response) => {
   const result = await UserServices.createAdmin(req);
@@ -55,7 +46,6 @@ const createAdmin = catchAsync(async (req: Request, res: Response) => {
 
 export const UserController = {
   getAllUsers,
-  createPatient,
-  createDoctor,
+  createUser,
   createAdmin,
 };

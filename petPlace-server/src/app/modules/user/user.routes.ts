@@ -18,25 +18,13 @@ router.get(
 );
 
 router.post(
-  "/create-patient",
+  "/create-user",
   fileUploader.upload.single("file"),
   (req: Request, res: Response, next: NextFunction) => {
-    req.body = UserValidation.createPatientValidation.parse(
+    req.body = UserValidation.createUserValidation.parse(
       JSON.parse(req.body.data),
     );
-    return UserController.createPatient(req, res, next);
-  },
-);
-
-router.post(
-  "/create-doctor",
-  auth(UserRole.ADMIN),
-  fileUploader.upload.single("file"),
-  (req: Request, res: Response, next: NextFunction) => {
-    req.body = UserValidation.createDoctorValidation.parse(
-      JSON.parse(req.body.data),
-    );
-    return UserController.createDoctor(req, res, next);
+    return UserController.createUser(req, res, next);
   },
 );
 

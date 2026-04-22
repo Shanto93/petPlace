@@ -60,7 +60,7 @@ const getAllUsers = async (filters: IFilters, options: IOptions) => {
   };
 };
 
-const createPatient = async (req: Request) => {
+const createUser = async (req: Request) => {
   if (req.file) {
     const uploadResult = await fileUploader.uploadToCloudinary(req.file);
     req.body.patient.profilePhoto = uploadResult;
@@ -89,37 +89,7 @@ const createPatient = async (req: Request) => {
   return result;
 };
 
-const createDoctor = async (req: Request) => {
-  if (req.file) {
-    const uploadResult = await fileUploader.uploadToCloudinary(req.file);
-    req.body.doctor.profilePhoto = uploadResult;
-  }
 
-  const hashedPassword = await bcrypt.hash(
-    req.body.password,
-    config.bcrypt.salt_rounds,
-  );
-  const result = await prisma.$transaction(async (tnx) => {
-    // Create the User
-    const newUser = await tnx.user.create({
-      data: {
-        email: req.body.doctor.email,
-        password: hashedPassword,
-        role: UserRole.DOCTOR,
-      },
-    });
-
-    // Create the Doctor profile
-    return await tnx.doctor.create({
-      data: {
-        ...req.body.doctor,
-        email: newUser.email,
-      },
-    });
-  });
-
-  return result;
-};
 
 const createAdmin = async (req: Request) => {
   if (req.file) {
@@ -155,7 +125,6 @@ const createAdmin = async (req: Request) => {
 
 export const UserServices = {
   getAllUsers,
-  createPatient,
-  createDoctor,
+  createUser,
   createAdmin,
 };

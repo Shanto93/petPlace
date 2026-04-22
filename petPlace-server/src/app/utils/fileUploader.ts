@@ -27,7 +27,7 @@ const uploadToCloudinary = async (file: Express.Multer.File) => {
   const uploadResult = await cloudinary.uploader
     .upload(file.path, {
       public_id: file.filename,
-      folder: "ph-healthcare/profile-photos",
+      folder: "petPlace/pets",
     })
     .catch((error) => {
       console.log(error);

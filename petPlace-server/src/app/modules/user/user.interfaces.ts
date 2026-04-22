@@ -1,6 +1,6 @@
-export interface ICreatePatientRequest {
+export interface ICreateUserRequest {
   password: string;
-  patient: {
+  user: {
     email: string;
     name: string;
     contactNumber: string;
