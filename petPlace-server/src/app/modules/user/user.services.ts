@@ -1,108 +1,64 @@
-import { Prisma, UserRole } from "@prisma/client";
+import { UserRole } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import type { Request } from "express";
 import config from "../../../config";
 import { prisma } from "../../shared/prisma";
 import { fileUploader } from "../../utils/fileUploader";
-import { paginationHelper } from "../../utils/paginationHelper";
-import { userSearchableFields } from "./user.constant";
-import { IFilters, IOptions } from "./user.interfaces";
-
-const getAllUsers = async (filters: IFilters, options: IOptions) => {
-  const { searchTerm, ...filterData } = filters;
-  const { page, limit, skip, sortBy, sortOrder } =
-    paginationHelper.calculatePagination(options);
-
-  const andConditions: Prisma.UserWhereInput[] = [];
-
-  if (searchTerm) {
-    andConditions.push({
-      OR: userSearchableFields.map((field) => ({
-        [field]: {
-          contains: searchTerm,
-          mode: "insensitive",
-        },
-      })),
-    });
-  }
-
-  if (Object.keys(filterData).length > 0) {
-    andConditions.push({
-      AND: Object.keys(filterData).map((key) => ({
-        [key]: {
-          equals: (filterData as any)[key],
-        },
-      })),
-    });
-  }
-
-  const whereCondition: Prisma.UserWhereInput =
-    andConditions.length > 0 ? { AND: andConditions } : {};
-
-  const users = await prisma.user.findMany({
-    skip,
-    take: limit,
-    where: whereCondition,
-    orderBy: {
-      [sortBy]: sortOrder,
-    },
-  });
-
-  const total = await prisma.user.count({ where: whereCondition });
-
-  return {
-    meta: {
-      page,
-      limit,
-      total,
-    },
-    data: users,
-  };
-};
 
 const createUser = async (req: Request) => {
+  // Safe Cloudinary check
   if (req.file) {
     const uploadResult = await fileUploader.uploadToCloudinary(req.file);
-    req.body.patient.profilePhoto = uploadResult;
+    if (uploadResult) {
+      req.body.user.profilePhoto = uploadResult;
+    }
   }
 
   const hashedPassword = await bcrypt.hash(
     req.body.password,
-    config.bcrypt.salt_rounds,
+    Number(config.bcrypt.salt_rounds) || 12,
   );
+
   const result = await prisma.$transaction(async (tnx) => {
-    // Create the User
+    // 1. Create Login Credential
     const newUser = await tnx.user.create({
       data: {
-        email: req.body.patient.email,
+        email: req.body.user.email,
         password: hashedPassword,
-        role: UserRole.PATIENT,
+        role: UserRole.USER,
       },
     });
 
-    // Create the Patient profile
-    return await tnx.patient.create({
-      data: req.body.patient,
+    // 2. Create the E-commerce Profile
+    const newProfile = await tnx.authenticatedUser.create({
+      data: {
+        ...req.body.user,
+        email: newUser.email,
+      },
     });
+
+    return newProfile;
   });
 
   return result;
 };
 
-
-
 const createAdmin = async (req: Request) => {
+  // Safe Cloudinary check
   if (req.file) {
     const uploadResult = await fileUploader.uploadToCloudinary(req.file);
-    req.body.admin.profilePhoto = uploadResult;
+    if (uploadResult) {
+      req.body.admin.profilePhoto = uploadResult;
+    }
   }
 
   const hashedPassword = await bcrypt.hash(
     req.body.password,
-    config.bcrypt.salt_rounds,
+    Number(config.bcrypt.salt_rounds) || 12,
   );
+
   const result = await prisma.$transaction(async (tnx) => {
-    // Create the User
+    // 1. Create Admin Credential
     const newUser = await tnx.user.create({
       data: {
         email: req.body.admin.email,
@@ -111,20 +67,21 @@ const createAdmin = async (req: Request) => {
       },
     });
 
-    // Create the Admin profile
-    return await tnx.admin.create({
+    // 2. Create Admin Profile
+    const newAdmin = await tnx.admin.create({
       data: {
         ...req.body.admin,
         email: newUser.email,
       },
     });
+
+    return newAdmin;
   });
 
   return result;
 };
 
 export const UserServices = {
-  getAllUsers,
   createUser,
   createAdmin,
 };

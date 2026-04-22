@@ -11,18 +11,13 @@ import { UserValidation } from "./user.validation";
 
 const router = express.Router();
 
-router.get(
-  "/",
-  auth(UserRole.ADMIN, UserRole.DOCTOR, UserRole.PATIENT),
-  UserController.getAllUsers,
-);
-
 router.post(
   "/create-user",
   fileUploader.upload.single("file"),
   (req: Request, res: Response, next: NextFunction) => {
+    // FIX: Using || "{}" to prevent undefined crash
     req.body = UserValidation.createUserValidation.parse(
-      JSON.parse(req.body.data),
+      JSON.parse(req.body.data || "{}"),
     );
     return UserController.createUser(req, res, next);
   },
@@ -33,8 +28,9 @@ router.post(
   auth(UserRole.ADMIN),
   fileUploader.upload.single("file"),
   (req: Request, res: Response, next: NextFunction) => {
+    // FIX: Using || "{}" to prevent undefined crash
     req.body = UserValidation.createAdminValidation.parse(
-      JSON.parse(req.body.data),
+      JSON.parse(req.body.data || "{}"),
     );
     return UserController.createAdmin(req, res, next);
   },

@@ -11,14 +11,14 @@ const login = catchAsync(async (req: Request, res: Response) => {
     httpOnly: true,
     secure: true,
     sameSite: "none",
-    maxAge: 1000 * 60 * 60, // 1 hour
+    maxAge: 1000 * 60 * 60,
   });
 
   res.cookie("refreshToken", result.refreshToken, {
     httpOnly: true,
     secure: true,
     sameSite: "none",
-    maxAge: 1000 * 60 * 60 * 24 * 90, // 90 days
+    maxAge: 1000 * 60 * 60 * 24 * 90, 
   });
 
   sendResponse(res, {
