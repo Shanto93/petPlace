@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+/* 1. Define Elite Theme Colors natively in Tailwind v4 */
+@theme {
+  --color-primary-sky: #87ceeb;
+  --color-secondary-sun: #ffd700;
+  --color-bg-cream: #fffdd0;
+  --color-text-charcoal: #333333;
+}
+
+/* 2. Base Styles */
+@layer base {
+  body {
+    @apply bg-bg-cream text-text-charcoal font-sans;
+  }
+  
+  ::selection {
+    @apply bg-primary-sky text-white;
+  }
+}
+
+/* 3. Elite Premium Components */
+@layer components {
+  .premium-card {
+    @apply bg-white rounded-[2rem] border-2 border-primary-sky p-6 transition-all duration-300 ease-out hover:-translate-y-2;
+    box-shadow: 8px 8px 0px 0px rgba(135, 206, 235, 0.4);
+  }
+  
+  .premium-card:hover {
+    box-shadow: 12px 12px 0px 0px rgba(135, 206, 235, 0.6);
+  }
+
+  .btn-primary {
+    @apply bg-primary-sky text-white font-bold py-3 px-8 rounded-full shadow-md transition-transform hover:scale-105 active:scale-95;
+  }
+}
