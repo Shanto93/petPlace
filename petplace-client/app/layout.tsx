@@ -1,4 +1,5 @@
 import { AuthProvider } from "@/components/providers/AuthProvider";
+import Navbar from "@/components/shared/Navbar";
 import type { Metadata } from "next";
 import "./globals.css";
 // Import your Navbar and ToastProvider here later!
@@ -18,7 +19,10 @@ export default function RootLayout({
       <body className="bg-bg-cream text-text-charcoal min-h-screen font-sans antialiased">
         <AuthProvider>
           {/* <Navbar /> */}
-          <main className="container mx-auto px-4 py-8">{children}</main>
+          <main className="container mx-auto px-4 py-8">
+            <Navbar />
+            {children}
+          </main>
           {/* <Footer /> */}
         </AuthProvider>
       </body>
