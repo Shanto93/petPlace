@@ -1,3 +1,5 @@
+// "use client";
+import Footer from "@/components/home/Footer";
 import { AuthProvider } from "@/components/providers/AuthProvider";
 import Navbar from "@/components/shared/Navbar";
 import type { Metadata } from "next";
@@ -16,14 +18,14 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className="bg-bg-cream text-text-charcoal min-h-screen font-sans antialiased">
+      {/* Add suppressHydrationWarning right here! */}
+      <body className="" suppressHydrationWarning>
         <AuthProvider>
-          {/* <Navbar /> */}
-          <main className="container mx-auto px-4 py-8">
-            <Navbar />
+          <Navbar />
+          <main className="container mx-auto px-4 min-h-[calc(100vh-80px)]">
             {children}
           </main>
-          {/* <Footer /> */}
+          <Footer />
         </AuthProvider>
       </body>
     </html>
