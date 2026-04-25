@@ -160,7 +160,7 @@ export default function ShopPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Animated Peeking Pet Header */}
         <div className="relative text-center mb-16 max-w-3xl mx-auto">
-          <div className="relative h-20 w-32 mx-auto mb-[-2rem] z-0 overflow-hidden">
+          <div className="relative h-20 w-32 mx-auto mb-[-2rem] z-20 overflow-hidden">
             <motion.div
               variants={peekPet}
               animate="animate"
