@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { AnimatePresence, motion, Variants } from "framer-motion";
@@ -9,99 +10,63 @@ import {
   Dog,
   Filter,
   Fish,
+  Rabbit,
   Search,
   Sparkles,
+  Turtle,
 } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { Suspense, useEffect, useMemo, useState } from "react";
 
-// 1. Mock Data
-const mockProducts = [
-  {
-    id: "1",
-    title: "Premium Organic Dog Bone",
-    category: "Dogs",
-    price: 24.99,
-    description: "A healthy, delicious chew for your best friend.",
-    icon: Bone,
-    color: "text-blue-500",
-    bg: "bg-blue-100",
-  },
-  {
-    id: "2",
-    title: "Luxury Cat Tree Tower",
-    category: "Cats",
-    price: 129.99,
-    description: "Multi-level entertainment and resting spot for felines.",
-    icon: Cat,
-    color: "text-orange-500",
-    bg: "bg-orange-100",
-  },
-  {
-    id: "3",
-    title: "Tropical Fish Flakes",
-    category: "Fish",
-    price: 14.5,
-    description: "Color-enhancing daily nutrition for tropical aquariums.",
-    icon: Fish,
-    color: "text-teal-500",
-    bg: "bg-teal-100",
-  },
-  {
-    id: "4",
-    title: "Interactive Bird Mirror",
-    category: "Birds",
-    price: 9.99,
-    description: "Keep your feathered friend entertained for hours.",
-    icon: Bird,
-    color: "text-pink-500",
-    bg: "bg-pink-100",
-  },
-  {
-    id: "5",
-    title: "Cozy Memory Foam Bed",
-    category: "Dogs",
-    price: 59.99,
-    description: "Orthopedic support for restful, elite sleep.",
-    icon: Dog,
-    color: "text-purple-500",
-    bg: "bg-purple-100",
-  },
-  {
-    id: "6",
-    title: "Automatic Laser Toy",
-    category: "Cats",
-    price: 34.99,
-    description: "Endless chasing fun with safe, automated laser patterns.",
-    icon: Cat,
-    color: "text-red-500",
-    bg: "bg-red-100",
-  },
-  {
-    id: "7",
-    title: "Gourmet Parrot Seed Mix",
-    category: "Birds",
-    price: 18.99,
-    description: "Nutrient-rich blend for vibrant feathers and health.",
-    icon: Bird,
-    color: "text-green-500",
-    bg: "bg-green-100",
-  },
-  {
-    id: "8",
-    title: "Aquarium Coral Decor",
-    category: "Fish",
-    price: 45.0,
-    description: "Premium glowing coral reef replica for tanks.",
-    icon: Fish,
-    color: "text-indigo-500",
-    bg: "bg-indigo-100",
-  },
+// ==========================================
+// 1. Types & Icon Mapping
+// ==========================================
+interface Category {
+  id: string;
+  pet: string;
+  name: string;
+  description: string;
+}
+
+interface Product {
+  id: string;
+  title: string;
+  price: number;
+  description: string;
+  icon: string;
+  color: string;
+  bg: string;
+  images?: string[];
+  category: Category | string; // Handles both populated object and unpopulated ID
+}
+
+// Maps the string from the database to the actual Lucide component
+const iconMap: Record<string, any> = {
+  Bone,
+  Cat,
+  Dog,
+  Fish,
+  Bird,
+  Rabbit,
+  Turtle,
+  Sparkles,
+};
+
+const categories = [
+  "All",
+  "Dogs",
+  "Cats",
+  "Birds",
+  "Fish",
+  "Small Pets",
+  "Reptiles",
 ];
 
-const categories = ["All", "Dogs", "Cats", "Birds", "Fish"];
-
-// 2. Enhanced Animation Variants
+// ==========================================
+// 2. Animations
+// ==========================================
 const staggerContainer: Variants = {
   hidden: { opacity: 0 },
   visible: {
@@ -137,23 +102,137 @@ const peekPet: Variants = {
   },
 };
 
-export default function ShopPage() {
+// ==========================================
+// 3. Image Slider Component (Auto-scroll)
+// ==========================================
+const ProductImageSlider = ({
+  images,
+  title,
+}: {
+  images: string[];
+  title: string;
+}) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    // Only auto-slide if there is more than 1 image
+    if (!images || images.length <= 1) return;
+
+    const timer = setInterval(() => {
+      setCurrentIndex((prevIndex) => (prevIndex + 1) % images.length);
+    }, 3000); // Slides every 3 seconds
+
+    return () => clearInterval(timer);
+  }, [images]);
+
+  return (
+    <div className="relative w-full h-full group overflow-hidden">
+      <AnimatePresence initial={false}>
+        <motion.div
+          key={currentIndex}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.8, ease: "easeInOut" }}
+          className="absolute inset-0"
+        >
+          <Image
+            src={images[currentIndex]}
+            alt={`${title} - View ${currentIndex + 1}`}
+            fill
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+            className="object-cover group-hover:scale-110 transition-transform duration-700"
+            priority={currentIndex === 0} // Prioritize loading the first image
+          />
+        </motion.div>
+      </AnimatePresence>
+
+      {/* Pagination Dots */}
+      {images.length > 1 && (
+        <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-1.5 z-10">
+          {images.map((_, i) => (
+            <div
+              key={i}
+              className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${
+                i === currentIndex
+                  ? "bg-white scale-125 shadow-sm"
+                  : "bg-white/50"
+              }`}
+            />
+          ))}
+        </div>
+      )}
+    </div>
+  );
+};
+
+// ==========================================
+// 4. Main Shop Content Component
+// ==========================================
+function ShopContent() {
+  const searchParams = useSearchParams();
+  const initialCategory = searchParams.get("category") || "All";
+
+  // State for products and loading
+  const [products, setProducts] = useState<Product[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // State for filters
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("All");
+  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
   const [maxPrice, setMaxPrice] = useState<number>(150);
 
+  // Fetch Data from Backend
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch("http://localhost:5000/api/v1/item");
+        const data = await response.json();
+
+        if (data.success) {
+          setProducts(data.data);
+        }
+      } catch (error) {
+        console.error("Failed to fetch products:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  // Filter Logic
   const filteredProducts = useMemo(() => {
-    return mockProducts.filter((item) => {
+    return products.filter((item) => {
+      // Search filter
       const matchesSearch =
         item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.description.toLowerCase().includes(searchTerm.toLowerCase());
+
+      // Safely extract category name (handles both string and object)
+      const categoryName =
+        typeof item.category === "object" ? item.category.pet : item.category;
+
       const matchesCategory =
-        selectedCategory === "All" || item.category === selectedCategory;
+        selectedCategory === "All" || categoryName === selectedCategory;
+
       const matchesPrice = item.price <= maxPrice;
 
       return matchesSearch && matchesCategory && matchesPrice;
     });
-  }, [searchTerm, selectedCategory, maxPrice]);
+  }, [products, searchTerm, selectedCategory, maxPrice]);
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-sky-50/50">
+        <Dog size={60} className="text-primary-sky animate-bounce mb-4" />
+        <h2 className="text-2xl font-black text-text-charcoal">
+          Fetching Treats from Database...
+        </h2>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-sky-50/50 pb-20 pt-12 relative overflow-hidden">
@@ -188,7 +267,7 @@ export default function ShopPage() {
         </div>
 
         <div className="flex flex-col lg:flex-row gap-8 items-start">
-          {/* REFINED SIDEBAR */}
+          {/* SIDEBAR FILTERS */}
           <motion.aside
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
@@ -303,7 +382,12 @@ export default function ShopPage() {
               >
                 <AnimatePresence>
                   {filteredProducts.map((product) => {
-                    const Icon = product.icon;
+                    const Icon = iconMap[product.icon] || Sparkles;
+                    const categoryDisplay =
+                      typeof product.category === "object"
+                        ? product.category.pet
+                        : product.category;
+
                     return (
                       <motion.div
                         key={product.id}
@@ -311,24 +395,34 @@ export default function ShopPage() {
                         variants={popInCard}
                         className="bg-white rounded-[2rem] p-5 border-2 border-gray-100 shadow-[0_6px_0_rgba(229,231,235,1)] hover:shadow-[0_10px_0_rgba(135,206,235,0.4)] hover:border-primary-sky/30 hover:-translate-y-2 transition-all duration-300 group flex flex-col h-full"
                       >
-                        {/* Image Area */}
                         <div
                           className={`${product.bg} rounded-[1.5rem] aspect-[4/3] mb-5 flex items-center justify-center border-2 border-transparent group-hover:border-white transition-all relative overflow-hidden`}
                         >
-                          <motion.div variants={floatingIcon} animate="animate">
-                            <Icon
-                              size={80}
-                              className={`${product.color} drop-shadow-sm group-hover:scale-110 transition-transform duration-300`}
-                              strokeWidth={1.5}
+                          {/* DYNAMIC IMAGE SLIDER OR FALLBACK ICON */}
+                          {product.images && product.images.length > 0 ? (
+                            <ProductImageSlider
+                              images={product.images}
+                              title={product.title}
                             />
-                          </motion.div>
+                          ) : (
+                            <motion.div
+                              variants={floatingIcon}
+                              animate="animate"
+                            >
+                              <Icon
+                                size={80}
+                                className={`${product.color} drop-shadow-sm group-hover:scale-110 transition-transform duration-300`}
+                                strokeWidth={1.5}
+                              />
+                            </motion.div>
+                          )}
 
-                          <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] font-black text-text-charcoal uppercase tracking-widest shadow-sm">
-                            {product.category}
+                          {/* Category Badge overlaying the top corner */}
+                          <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-[10px] font-black text-text-charcoal uppercase tracking-widest shadow-sm z-20">
+                            {categoryDisplay}
                           </div>
                         </div>
 
-                        {/* Details Area */}
                         <div className="flex-grow flex flex-col">
                           <h3 className="font-black text-xl mb-2 text-text-charcoal leading-tight line-clamp-2">
                             {product.title}
@@ -338,7 +432,6 @@ export default function ShopPage() {
                           </p>
                         </div>
 
-                        {/* REFINED Price & Action Area */}
                         <div className="mt-auto flex items-center justify-between pt-4 border-t-2 border-dashed border-gray-100">
                           <div className="flex flex-col">
                             <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">
@@ -349,7 +442,6 @@ export default function ShopPage() {
                             </span>
                           </div>
 
-                          {/* REFINED DETAILS BUTTON: Sleek, expandable pill */}
                           <Link
                             href={`/items/${product.id}`}
                             className="relative flex items-center justify-center w-12 h-12 bg-primary-sky text-white rounded-full font-bold hover:w-32 hover:px-4 transition-all duration-300 ease-out shadow-sm hover:shadow-md group/btn overflow-hidden"
@@ -373,5 +465,25 @@ export default function ShopPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// ==========================================
+// 5. Main Export Wrapped in Suspense
+// ==========================================
+export default function ShopPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen flex flex-col items-center justify-center bg-sky-50/50">
+          <Dog size={60} className="text-primary-sky animate-bounce mb-4" />
+          <h2 className="text-2xl font-black text-text-charcoal">
+            Fetching Treats...
+          </h2>
+        </div>
+      }
+    >
+      <ShopContent />
+    </Suspense>
   );
 }
