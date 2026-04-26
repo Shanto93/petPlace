@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
-// 1. Import usePathname from next/navigation
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
@@ -20,8 +19,6 @@ export default function Navbar() {
   const { data: session } = useSession();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-
-  // 2. Initialize the pathname hook
   const pathname = usePathname();
 
   const publicRoutes = [
@@ -33,12 +30,8 @@ export default function Navbar() {
 
   const protectedRoutes = [{ name: "My Orders", path: "/cart" }];
 
-  // Helper function to determine if a route is active
   const isActive = (path: string) => {
-    if (path === "/") {
-      return pathname === "/";
-    }
-    // Uses startsWith so nested routes like /items/123 also keep "Shop All" active
+    if (path === "/") return pathname === "/";
     return pathname.startsWith(path);
   };
 
@@ -62,7 +55,6 @@ export default function Navbar() {
               <Link
                 key={route.name}
                 href={route.path}
-                // 3. Conditionally apply active styling
                 className={`relative transition-colors py-2 ${
                   isActive(route.path)
                     ? "text-primary-sky"
@@ -70,7 +62,6 @@ export default function Navbar() {
                 }`}
               >
                 {route.name}
-                {/* 4. Add a cute active indicator dot */}
                 {isActive(route.path) && (
                   <motion.div
                     layoutId="activeNavIndicator"
@@ -107,8 +98,7 @@ export default function Navbar() {
                 href="/login"
                 className="btn-primary ml-4 flex items-center gap-2 text-sm px-6 py-2.5"
               >
-                <User size={18} />
-                Login / Register
+                <User size={18} /> Login / Register
               </Link>
             ) : (
               <div className="relative ml-2">
@@ -124,7 +114,6 @@ export default function Navbar() {
                   </span>
                 </button>
 
-                {/* Dropdown Menu */}
                 <AnimatePresence>
                   {isDropdownOpen && (
                     <motion.div
@@ -133,9 +122,9 @@ export default function Navbar() {
                       exit={{ opacity: 0, y: 10 }}
                       className="absolute right-0 mt-3 w-56 bg-white border-2 border-primary-sky/30 rounded-2xl shadow-xl overflow-hidden flex flex-col"
                     >
+                      {/* Restored: Accessible to all logged-in users */}
                       <Link
                         href="/items/add"
-                        onClick={() => setIsDropdownOpen(false)}
                         className={`flex items-center gap-3 px-4 py-3 hover:bg-bg-cream transition-colors border-b border-gray-100 font-medium ${
                           isActive("/items/add")
                             ? "bg-bg-cream text-primary-sky"
@@ -147,7 +136,6 @@ export default function Navbar() {
                       </Link>
                       <Link
                         href="/items/manage"
-                        onClick={() => setIsDropdownOpen(false)}
                         className={`flex items-center gap-3 px-4 py-3 hover:bg-bg-cream transition-colors border-b border-gray-100 font-medium ${
                           isActive("/items/manage")
                             ? "bg-bg-cream text-primary-sky"
@@ -174,7 +162,7 @@ export default function Navbar() {
           <div className="md:hidden flex items-center">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="text-text-charcoal focus:outline-none"
+              className="text-text-charcoal"
             >
               {isMobileMenuOpen ? <X size={28} /> : <Menu size={28} />}
             </button>
@@ -182,7 +170,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Mobile Menu Dropdown */}
+      {/* Mobile Menu Restored with shared logic */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
@@ -196,13 +184,7 @@ export default function Navbar() {
                 <Link
                   key={route.name}
                   href={route.path}
-                  onClick={() => setIsMobileMenuOpen(false)}
-                  // 5. Apply active state styling in mobile menu
-                  className={`font-semibold px-4 py-2 rounded-xl transition-colors ${
-                    isActive(route.path)
-                      ? "bg-primary-sky/10 text-primary-sky"
-                      : "text-gray-600 hover:bg-gray-50"
-                  }`}
+                  className={`font-semibold px-4 py-2 rounded-xl ${isActive(route.path) ? "bg-primary-sky/10 text-primary-sky" : "text-gray-600"}`}
                 >
                   {route.name}
                 </Link>
@@ -210,51 +192,23 @@ export default function Navbar() {
 
               {session ? (
                 <>
-                  {protectedRoutes.map((route) => (
-                    <Link
-                      key={route.name}
-                      href={route.path}
-                      onClick={() => setIsMobileMenuOpen(false)}
-                      className={`font-semibold px-4 py-2 rounded-xl transition-colors ${
-                        isActive(route.path)
-                          ? "bg-primary-sky/10 text-primary-sky"
-                          : "text-gray-600 hover:bg-gray-50"
-                      }`}
-                    >
-                      {route.name}
-                    </Link>
-                  ))}
-                  <hr className="border-gray-100" />
                   <Link
                     href="/items/add"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className={`flex items-center gap-3 font-semibold px-4 py-2 rounded-xl transition-colors ${
-                      isActive("/items/add")
-                        ? "bg-primary-sky/10 text-primary-sky"
-                        : "text-text-charcoal hover:bg-gray-50"
-                    }`}
+                    className={`flex items-center gap-3 font-semibold px-4 py-2 rounded-xl ${isActive("/items/add") ? "bg-primary-sky/10 text-primary-sky" : ""}`}
                   >
                     <PlusCircle size={18} className="text-primary-sky" /> Add
                     Product
                   </Link>
                   <Link
                     href="/items/manage"
-                    onClick={() => setIsMobileMenuOpen(false)}
-                    className={`flex items-center gap-3 font-semibold px-4 py-2 rounded-xl transition-colors ${
-                      isActive("/items/manage")
-                        ? "bg-primary-sky/10 text-primary-sky"
-                        : "text-text-charcoal hover:bg-gray-50"
-                    }`}
+                    className={`flex items-center gap-3 font-semibold px-4 py-2 rounded-xl ${isActive("/items/manage") ? "bg-primary-sky/10 text-primary-sky" : ""}`}
                   >
                     <PackageSearch size={18} className="text-primary-sky" />{" "}
                     Manage Products
                   </Link>
                   <button
-                    onClick={() => {
-                      setIsMobileMenuOpen(false);
-                      signOut({ callbackUrl: "/" });
-                    }}
-                    className="flex items-center gap-3 font-bold text-red-500 mt-2 px-4 py-2 hover:bg-red-50 rounded-xl transition-colors text-left"
+                    onClick={() => signOut({ callbackUrl: "/" })}
+                    className="flex items-center gap-3 font-bold text-red-500 px-4 py-2"
                   >
                     <LogOut size={18} /> Logout
                   </button>
@@ -262,7 +216,6 @@ export default function Navbar() {
               ) : (
                 <Link
                   href="/login"
-                  onClick={() => setIsMobileMenuOpen(false)}
                   className="btn-primary text-center w-full mt-2"
                 >
                   Login / Register

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { motion, Variants } from "framer-motion";
@@ -11,8 +12,10 @@ import {
   Sparkles,
   Trash2,
 } from "lucide-react";
+import { useSession } from "next-auth/react"; // 1. IMPORT USE SESSION
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 // ==========================================
@@ -36,7 +39,6 @@ interface CartItem {
   item: Product;
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const iconMap: Record<string, any> = { Bone, Cat, Dog, Sparkles };
 
 // ==========================================
@@ -72,19 +74,36 @@ const peekPet: Variants = {
 // 3. Main Cart Component
 // ==========================================
 export default function CartPage() {
+  const router = useRouter();
+  // 2. GET SESSION DATA
+  const { data: session, status } = useSession();
+
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  // Optional: Add a loading state for the delete button to prevent spam clicking
   const [isDeletingId, setIsDeletingId] = useState<string | null>(null);
 
   // Fetch Cart Data
   useEffect(() => {
     const fetchCart = async () => {
+      // 3. WAIT FOR SESSION TO LOAD
+      if (status === "loading") return;
+      if (status === "unauthenticated" || !session?.user) {
+        router.push("/login");
+        return;
+      }
+
       try {
-        const currentUserId = "79452816-88f8-485f-9524-07455c8dc1fe";
+        // 4. GET THE DYNAMIC USER ID
+        const currentUserId = (session.user as any).id;
+        const accessToken = (session as any).accessToken;
 
         const res = await fetch(
-          `http://localhost:5000/api/v1/cart/user/${currentUserId}`,
+          `https://petplace-server-3.onrender.com/api/v1/cart/user/${currentUserId}`,
+          {
+            headers: {
+              Authorization: `Bearer ${accessToken}`, // Added auth header for security
+            },
+          },
         );
         const data = await res.json();
 
@@ -99,28 +118,31 @@ export default function CartPage() {
     };
 
     fetchCart();
-  }, []);
+  }, [session, status, router]); // Re-run when session status changes
 
   // ==========================================
   // REAL BACKEND DELETE INTEGRATION
   // ==========================================
   const handleDelete = async (cartItemId: string) => {
-    // Prevent multiple clicks while already deleting
     if (isDeletingId) return;
 
     setIsDeletingId(cartItemId);
 
     try {
+      const accessToken = (session as any)?.accessToken;
+
       const res = await fetch(
-        `http://localhost:5000/api/v1/cart/${cartItemId}`,
+        `https://petplace-server-3.onrender.com/api/v1/cart/${cartItemId}`,
         {
           method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${accessToken}`, // Ensure delete is authorized
+          },
         },
       );
       const data = await res.json();
 
       if (data.success) {
-        // Remove the item from the local state so it instantly disappears from the UI
         setCartItems((prevItems) =>
           prevItems.filter((item) => item.id !== cartItemId),
         );
@@ -143,7 +165,7 @@ export default function CartPage() {
   const shipping = subtotal > 0 ? 5.99 : 0;
   const total = subtotal + shipping;
 
-  if (isLoading) {
+  if (isLoading || status === "loading") {
     return (
       <div className="min-h-[80vh] flex flex-col items-center justify-center bg-sky-50/50">
         <Dog size={60} className="text-primary-sky animate-bounce mb-4" />
@@ -263,7 +285,6 @@ export default function CartPage() {
                           disabled={isDeletingId === cartItem.id}
                           className="w-10 h-10 flex items-center justify-center bg-red-50 text-red-500 rounded-xl hover:bg-red-500 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                         >
-                          {/* Spin the trash icon slightly if it's currently deleting */}
                           {isDeletingId === cartItem.id ? (
                             <motion.div
                               animate={{ rotate: 360 }}

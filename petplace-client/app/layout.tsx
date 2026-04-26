@@ -4,6 +4,7 @@ import { AuthProvider } from "@/components/providers/AuthProvider";
 import Navbar from "@/components/shared/Navbar";
 import type { Metadata } from "next";
 import "./globals.css";
+import { Toaster } from "sonner";
 // Import your Navbar and ToastProvider here later!
 
 export const metadata: Metadata = {
@@ -24,6 +25,7 @@ export default function RootLayout({
           <Navbar />
           <main className="container mx-auto px-4 min-h-[calc(100vh-80px)]">
             {children}
+            <Toaster position="top-center" richColors />
           </main>
           <Footer />
         </AuthProvider>
