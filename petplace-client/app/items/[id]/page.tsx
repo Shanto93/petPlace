@@ -22,6 +22,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { use, useEffect, useState } from "react";
+// 1. IMPORT USESESSION FROM NEXT-AUTH
+import { useSession } from "next-auth/react";
 
 // ==========================================
 // 1. Types & Icon Mapping
@@ -157,6 +159,9 @@ export default function ItemDetailsPage({
   const resolvedParams = use(params);
   const router = useRouter();
 
+  // 2. GET THE ACTIVE USER SESSION
+  const { data: session, status } = useSession();
+
   const [product, setProduct] = useState<Product | null>(null);
   const [relatedItems, setRelatedItems] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -168,7 +173,7 @@ export default function ItemDetailsPage({
     const fetchItemData = async () => {
       try {
         const res = await fetch(
-          `https://petplace-server-3.onrender.com/api/v1/item/${resolvedParams.id}`,
+          `http://localhost:5000/api/v1/item/${resolvedParams.id}`,
         );
         const data = await res.json();
 
@@ -181,7 +186,7 @@ export default function ItemDetailsPage({
               ? currentItem.category.pet
               : currentItem.category;
           const relatedRes = await fetch(
-            `https://petplace-server-3.onrender.com/api/v1/item?category=${categoryName}`,
+            `http://localhost:5000/api/v1/item?category=${categoryName}`,
           );
           const relatedData = await relatedRes.json();
 
@@ -207,11 +212,29 @@ export default function ItemDetailsPage({
   // ==========================================
   const handleAddToCart = async () => {
     if (!product) return;
+
+    // 3. SECURITY CHECK: Make sure user is logged in!
+    if (status === "unauthenticated" || !session?.user) {
+      alert("Please log in to add items to your cart! 🐾");
+      router.push("/login"); // Adjust this path if your login page is named differently
+      return;
+    }
+
     setIsAdding(true);
 
     try {
-      // Using the exact user ID you successfully tested!
-      const currentUserId = "79452816-88f8-485f-9524-07455c8dc1fe";
+      // 4. GET THE DYNAMIC USER ID FROM SESSION
+      // We use 'as any' to avoid TypeScript errors if you haven't strictly typed your NextAuth session yet
+      const currentUserId = (session.user as any).id;
+      console.log(currentUserId);
+
+      if (!currentUserId) {
+        alert(
+          "Could not find your user ID. Please try logging out and back in.",
+        );
+        setIsAdding(false);
+        return;
+      }
 
       const payload = {
         userId: currentUserId,
@@ -219,16 +242,15 @@ export default function ItemDetailsPage({
         quantity: quantity,
       };
 
-      const res = await fetch(
-        "https://petplace-server-3.onrender.com/api/v1/cart",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(payload),
+      const res = await fetch("http://localhost:5000/api/v1/cart", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          // If your backend requires a token to post to the cart, pass it here!
+          // "Authorization": `Bearer ${(session as any)?.accessToken}`
         },
-      );
+        body: JSON.stringify(payload),
+      });
 
       const data = await res.json();
 

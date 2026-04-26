@@ -15,7 +15,7 @@ const fadeUp: Variants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: "easeOut" } },
 };
 
-// New: Carousel/Slider animation variants
+// Carousel/Slider animation variants
 const sliderVariants: Variants = {
   initial: (direction: number) => ({
     x: direction > 0 ? "100%" : "-100%",
@@ -44,7 +44,7 @@ const sliderVariants: Variants = {
   }),
 };
 
-// New: Playful/Cute Cartoon floating animation for card content
+// Playful/Cute Cartoon floating animation
 const cartoonFloat: Variants = {
   animate: {
     y: [0, -8, 0],
@@ -58,7 +58,6 @@ const cartoonFloat: Variants = {
 };
 
 export default function Testimonials() {
-  // Extracting existing review data
   const reviews = [
     {
       text: "The quality is unmatched. My golden retriever is obsessed with the organic toys!",
@@ -78,20 +77,17 @@ export default function Testimonials() {
     },
   ];
 
-  // Carousel State Management
   const [index, setIndex] = useState(0);
-  const [direction, setDirection] = useState(1); // 1 = forward, -1 = backward
+  const [direction, setDirection] = useState(1);
   const autoPlayRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Auto-scroll logic (Required: changes index every 6 seconds)
   useEffect(() => {
     autoPlayRef.current = setInterval(() => {
-      setDirection(1); // Auto-scroll always goes forward
+      setDirection(1);
       setIndex((prevIndex) => (prevIndex + 1) % reviews.length);
-    }, 6000); // 6 second interval
+    }, 6000);
 
     return () => {
-      // Clean up interval on component unmount
       if (autoPlayRef.current) {
         clearInterval(autoPlayRef.current);
       }
@@ -104,25 +100,25 @@ export default function Testimonials() {
       whileInView="visible"
       viewport={{ once: true, margin: "-100px" }}
       variants={staggerContainer}
-      // Stacking styling:speech bubble shape, borders, shadow
-      className="bg-white rounded-[3rem] p-10 md:p-16 border-4 border-secondary-sun/40 shadow-2xl relative"
+      // UI FIX: Added max-w-4xl to prevent full-screen stretching on desktop
+      // UI FIX: Reduced md:p-16 to md:p-12 so the box isn't unnecessarily tall
+      className="max-w-4xl bg-white rounded-[2rem] md:rounded-[3rem] p-6 sm:p-10 md:p-12 border-4 border-secondary-sun/40 shadow-2xl relative mx-4 lg:mx-auto my-10"
     >
-      {/* Cartoon "speech bubble" thought tail */}
-      <div className="absolute top-0 left-12 -translate-y-1/2 bg-secondary-sun text-text-charcoal font-black px-6 py-2 rounded-full rotate-[-7deg] flex items-center gap-2">
-        <PawPrint className="text-text-charcoal" size={20} />
+      <div className="absolute top-0 left-6 sm:left-12 -translate-y-1/2 bg-secondary-sun text-text-charcoal font-black px-4 py-1.5 sm:px-6 sm:py-2 text-sm sm:text-base rounded-full rotate-[-7deg] flex items-center gap-2">
+        <PawPrint className="text-text-charcoal w-4 h-4 sm:w-5 sm:h-5" />
         Happy Tails
       </div>
 
       <motion.h2
         variants={fadeUp}
-        className="text-4xl font-extrabold text-center mb-16 text-text-charcoal tracking-tight"
+        // UI FIX: Tighter bottom margin on large screens
+        className="text-3xl md:text-4xl font-extrabold text-center mb-10 md:mb-12 text-text-charcoal tracking-tight mt-4"
       >
         What Our Pack Says
       </motion.h2>
 
-      {/* Horizontal Overflow Viewport for Slider */}
-      <div className="relative overflow-hidden min-h-[300px]">
-        {/* framer-motion AnimatePresence enables exit animations */}
+      {/* UI FIX: Reduced minimum height for medium/large screens (md:min-h-[250px]) */}
+      <div className="relative overflow-hidden min-h-[350px] sm:min-h-[300px] md:min-h-[250px]">
         <AnimatePresence initial={false} custom={direction}>
           <motion.div
             key={index}
@@ -131,36 +127,35 @@ export default function Testimonials() {
             initial="initial"
             animate="animate"
             exit="exit"
-            // Stack items horizontally
-            className="flex flex-col items-center justify-center text-center absolute w-full gap-6 px-4"
+            className="flex flex-col items-center justify-center text-center absolute w-full gap-6 px-2 sm:px-4"
           >
-            {/* Indiviudal slide card with floating cartoon effect */}
             <motion.div
               variants={cartoonFloat}
               animate="animate"
-              // Preserving user styling classes (bg-bg-cream, text-primary-sky)
-              className="p-8 bg-bg-cream rounded-[2.5rem] border-2 border-gray-200/50 shadow-lg relative flex flex-col items-center gap-6"
+              // UI FIX: Shrunk the maximum width of the inner card from max-w-2xl to max-w-xl
+              className="p-6 sm:p-8 w-full max-w-[95%] sm:max-w-lg md:max-w-xl bg-bg-cream rounded-[2rem] sm:rounded-[2.5rem] border-2 border-gray-200/50 shadow-lg relative flex flex-col items-center gap-4 sm:gap-6"
             >
-              {/* Cute Icons: Large quote icon */}
               <Quote
-                className="absolute -top-4 -left-4 text-secondary-sun rotate-[-15deg] opacity-60"
-                size={40}
+                className="absolute -top-3 -left-2 sm:-top-4 sm:-left-4 text-secondary-sun rotate-[-15deg] opacity-60 w-8 h-8 sm:w-10 sm:h-10"
                 strokeWidth={3}
               />
 
-              {/* Enhanced Star Rating: Larger stars */}
-              <div className="flex gap-1 text-secondary-sun mb-2">
+              <div className="flex gap-1 text-secondary-sun mb-1 sm:mb-2">
                 {[...Array(5)].map((_, j) => (
-                  <Star key={j} size={28} fill="currentColor" strokeWidth={1} />
+                  <Star
+                    key={j}
+                    className="w-5 h-5 sm:w-7 sm:h-7"
+                    fill="currentColor"
+                    strokeWidth={1}
+                  />
                 ))}
               </div>
 
-              {/* Preserving user text and author style */}
-              <p className="text-gray-700 italic font-semibold leading-relaxed px-4 text-lg">
+              <p className="text-gray-700 italic font-semibold leading-relaxed px-0 sm:px-4 text-base sm:text-lg">
                 &quot;{reviews[index].text}&quot;
               </p>
 
-              <p className="font-bold text-primary-sky text-xl">
+              <p className="font-bold text-primary-sky text-lg sm:text-xl">
                 — {reviews[index].author}
               </p>
             </motion.div>

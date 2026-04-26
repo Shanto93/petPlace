@@ -79,9 +79,7 @@ export default function CategoriesPage() {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const response = await fetch(
-          "https://petplace-server-3.onrender.com/api/v1/category",
-        );
+        const response = await fetch("http://localhost:5000/api/v1/category");
         const data = await response.json();
 
         if (data.success) {
