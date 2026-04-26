@@ -38,10 +38,10 @@ export default function Newsletter() {
       whileInView="visible"
       viewport={{ once: true, margin: "-50px" }}
       variants={popIn}
-      // REDUCED PADDING & SIZE: p-8 md:p-12 instead of p-20
-      className="relative max-w-5xl mx-auto bg-gradient-to-tr from-primary-sky to-sky-400 text-text-charcoal rounded-[2.5rem] p-8 md:p-12 text-center overflow-hidden border-4 border-white shadow-[0_12px_0_rgba(0,0,0,0.05)]"
+      // UI FIX: Added mx-4 so it doesn't touch screen edges on mobile, reduced mobile padding (p-6)
+      className="relative max-w-5xl mx-4 lg:mx-auto bg-gradient-to-tr from-primary-sky to-sky-400 text-text-charcoal rounded-[2.5rem] p-6 sm:p-8 md:p-12 text-center overflow-hidden border-4 border-white shadow-[0_12px_0_rgba(0,0,0,0.05)]"
     >
-      {/* Floating Cartoon Element 1: Top Left Bone (Scaled Down) */}
+      {/* Floating Cartoon Element 1: Top Left Bone */}
       <motion.div
         variants={floatSlow}
         animate="animate"
@@ -50,7 +50,7 @@ export default function Newsletter() {
         <Bone size={50} className="rotate-[-45deg]" />
       </motion.div>
 
-      {/* Floating Cartoon Element 2: Bottom Right Paw (Scaled Down) */}
+      {/* Floating Cartoon Element 2: Bottom Right Paw */}
       <motion.div
         variants={floatFast}
         animate="animate"
@@ -59,7 +59,7 @@ export default function Newsletter() {
         <PawPrint size={60} className="rotate-[20deg]" />
       </motion.div>
 
-      {/* Main Cartoon Character Setup (Scaled Down) */}
+      {/* Main Cartoon Character Setup */}
       <motion.div
         variants={floatFast}
         animate="animate"
@@ -73,11 +73,10 @@ export default function Newsletter() {
       </motion.div>
 
       <div className="relative z-10 max-w-xl mx-auto space-y-4">
-        {/* REDUCED TYPOGRAPHY */}
         <h2 className="text-3xl md:text-4xl font-black tracking-tight text-white drop-shadow-md">
           Join The Elite Pack!
         </h2>
-        <p className="text-sky-50 text-base md:text-lg font-bold max-w-md mx-auto drop-shadow-sm">
+        <p className="text-sky-50 text-base md:text-lg font-bold max-w-md mx-auto drop-shadow-sm px-2">
           Snag <span className="text-secondary-sun text-xl">15% OFF</span> your
           first order and get early access to premium drops!
         </p>
@@ -85,8 +84,9 @@ export default function Newsletter() {
         {/* GLASSMORPHISM FORM CONTAINER */}
         <div className="pt-4">
           <form
-            // Glassmorphism wrapper: Semi-transparent white, blur effect, subtle white border
-            className="flex flex-col sm:flex-row gap-2 max-w-md mx-auto bg-white/20 backdrop-blur-md border border-white/40 p-2 rounded-full shadow-xl"
+            // UI FIX: Changed rounded-full to rounded-3xl on mobile to fix the pill-shape stretching.
+            // UI FIX: Increased mobile padding (p-3) and gap (gap-3) for a cleaner vertical stack.
+            className="flex flex-col sm:flex-row gap-3 sm:gap-2 max-w-md mx-auto bg-white/20 backdrop-blur-md border border-white/40 p-3 sm:p-2 rounded-3xl sm:rounded-full shadow-xl"
             onSubmit={(e) => e.preventDefault()}
           >
             <div className="flex-1 relative">
@@ -96,13 +96,12 @@ export default function Newsletter() {
               <input
                 type="email"
                 placeholder="Enter your email..."
-                // Reduced input padding and text size
                 className="w-full pl-14 pr-4 py-3 rounded-full text-text-charcoal text-sm font-bold outline-none border-2 border-transparent focus:border-white transition-all bg-white/90 focus:bg-white shadow-inner placeholder:text-gray-400 placeholder:font-medium"
               />
             </div>
 
-            {/* Action Button (Scaled Down) */}
-            <button className="bg-secondary-sun text-text-charcoal font-black text-sm px-6 py-3 rounded-full hover:scale-105 active:scale-95 transition-transform border-b-4 border-orange-400 shadow-md flex items-center justify-center gap-2">
+            {/* UI FIX: Added w-full on mobile, sm:w-auto on desktop so the button stretches properly */}
+            <button className="w-full sm:w-auto bg-secondary-sun text-text-charcoal font-black text-sm px-6 py-3 rounded-full hover:scale-105 active:scale-95 transition-transform border-b-4 border-orange-400 shadow-md flex items-center justify-center gap-2">
               Subscribe
             </button>
           </form>
