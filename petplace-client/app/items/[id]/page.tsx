@@ -168,7 +168,7 @@ export default function ItemDetailsPage({
     const fetchItemData = async () => {
       try {
         const res = await fetch(
-          `http://localhost:5000/api/v1/item/${resolvedParams.id}`,
+          `https://pet-place-server.vercel.app/api/v1/item/${resolvedParams.id}`,
         );
         const data = await res.json();
 
@@ -181,7 +181,7 @@ export default function ItemDetailsPage({
               ? currentItem.category.pet
               : currentItem.category;
           const relatedRes = await fetch(
-            `http://localhost:5000/api/v1/item?category=${categoryName}`,
+            `https://pet-place-server.vercel.app/api/v1/item?category=${categoryName}`,
           );
           const relatedData = await relatedRes.json();
 
@@ -219,13 +219,16 @@ export default function ItemDetailsPage({
         quantity: quantity,
       };
 
-      const res = await fetch("http://localhost:5000/api/v1/cart", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
+      const res = await fetch(
+        "https://pet-place-server.vercel.app/api/v1/cart",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(payload),
         },
-        body: JSON.stringify(payload),
-      });
+      );
 
       const data = await res.json();
 

@@ -84,7 +84,7 @@ export default function CartPage() {
         const currentUserId = "79452816-88f8-485f-9524-07455c8dc1fe";
 
         const res = await fetch(
-          `http://localhost:5000/api/v1/cart/user/${currentUserId}`,
+          `https://pet-place-server.vercel.app/api/v1/cart/user/${currentUserId}`,
         );
         const data = await res.json();
 
@@ -112,7 +112,7 @@ export default function CartPage() {
 
     try {
       const res = await fetch(
-        `http://localhost:5000/api/v1/cart/${cartItemId}`,
+        `https://pet-place-server.vercel.app/api/v1/cart/${cartItemId}`,
         {
           method: "DELETE",
         },
