@@ -10,7 +10,11 @@ const app: Application = express();
 
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://localhost:5000"],
+    origin: [
+      "http://localhost:3000",
+      "https://pet-place-server.vercel.app",
+      "https://petplace-client.vercel.app",
+    ],
     credentials: true,
   }),
 );
