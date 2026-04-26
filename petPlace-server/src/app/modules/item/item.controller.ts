@@ -49,8 +49,48 @@ const getItemById = catchAsync(async (req: Request, res: Response) => {
 });
 
 const updateItem = catchAsync(async (req: Request, res: Response) => {
-  const result = await ItemServices.updateItem(req.params.id, req.body);
-  sendResponse(res, { statusCode: 200, success: true, message: "Item updated", data: result });
+  const { id } = req.params;
+
+  // 1. Parse stringified JSON data from FormData
+  let updateData;
+  if (req.body.data) {
+    updateData = JSON.parse(req.body.data);
+  } else {
+    updateData = { ...req.body };
+  }
+
+  // 2. Handle New Image Uploads
+  const newImageUrls: string[] = [];
+  if (req.files && Array.isArray(req.files) && req.files.length > 0) {
+    for (const file of req.files) {
+      const uploadResult = await fileUploader.uploadToCloudinary(file);
+      if (uploadResult) {
+        newImageUrls.push(uploadResult);
+      }
+    }
+  }
+
+  /* 3. Merge Images:
+    'updateData.images' contains the existing URLs we want to keep (sent from frontend).
+    'newImageUrls' contains the newly uploaded Cloudinary URLs.
+  */
+  const finalImages = [
+    ...(Array.isArray(updateData.images) ? updateData.images : []),
+    ...newImageUrls
+  ];
+
+  // Update the payload with the merged image array
+  updateData.images = finalImages;
+
+  // 4. Send cleaned data to service
+  const result = await ItemServices.updateItem(id, updateData);
+
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Item reforged successfully",
+    data: result,
+  });
 });
 
 const deleteItem = catchAsync(async (req: Request, res: Response) => {

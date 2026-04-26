@@ -13,7 +13,11 @@ router.post(
 
 router.get("/", ItemController.getAllItems);
 router.get("/:id", ItemController.getItemById);
-router.patch("/:id", ItemController.updateItem);
+router.patch(
+  "/:id", 
+  fileUploader.upload.array("images", 5), 
+  ItemController.updateItem
+);
 router.delete("/:id", ItemController.deleteItem);
 
 export const itemRoutes = router;

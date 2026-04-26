@@ -2,7 +2,7 @@ import { z } from "zod";
 
 const addToCartValidation = z.object({
   body: z.object({
-    userId: z.string({ message: "User ID is required" }),
+    userId: z.string({ message: "User ID is required" }), // Make sure this says userId
     itemId: z.string({ message: "Item ID is required" }),
     quantity: z.number().int().positive().default(1),
   }),
@@ -17,7 +17,4 @@ const updateCartValidation = z.object({
   }),
 });
 
-export const CartValidation = {
-  addToCartValidation,
-  updateCartValidation,
-};
+export const CartValidation = { addToCartValidation, updateCartValidation };

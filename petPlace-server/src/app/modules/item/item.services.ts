@@ -49,9 +49,12 @@ const getItemById = async (id: string) => {
 };
 
 const updateItem = async (id: string, payload: Partial<Item>) => {
+  // Defensive: ensure we don't try to update the ID itself
+  const { id: _, ...dataToUpdate } = payload as any;
+
   return await prisma.item.update({
     where: { id },
-    data: payload,
+    data: dataToUpdate,
   });
 };
 

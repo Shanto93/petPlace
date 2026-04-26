@@ -4,7 +4,6 @@ import sendResponse from "../../shared/sendResponse";
 import { CartServices } from "./cart.services";
 
 const addToCart = catchAsync(async (req: Request, res: Response) => {
-  // Note: In a fully authenticated app, req.body.userId might be set by your auth middleware from the token (e.g., req.user.id)
   const result = await CartServices.addToCart(req.body);
   sendResponse(res, {
     statusCode: 201,
@@ -15,9 +14,9 @@ const addToCart = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getMyCart = catchAsync(async (req: Request, res: Response) => {
-  // Fetching the userId from the URL parameter
-  const { userId } = req.params;
-  const result = await CartServices.getMyCart(userId);
+  // Fetching the email from the URL parameter instead of userId
+  const { email } = req.params;
+  const result = await CartServices.getMyCart(email);
   sendResponse(res, {
     statusCode: 200,
     success: true,
@@ -45,7 +44,7 @@ const removeFromCart = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: "Item removed from cart",
+    message: "Item removed",
     data: result,
   });
 });
