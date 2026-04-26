@@ -80,7 +80,7 @@ export default function CategoriesPage() {
     const fetchCategories = async () => {
       try {
         const response = await fetch(
-          "https://pet-place-server.vercel.app/api/v1/category",
+          "https://petplace-server-3.onrender.com/api/v1/category",
         );
         const data = await response.json();
 

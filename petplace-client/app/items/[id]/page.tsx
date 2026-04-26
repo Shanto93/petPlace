@@ -168,7 +168,7 @@ export default function ItemDetailsPage({
     const fetchItemData = async () => {
       try {
         const res = await fetch(
-          `https://pet-place-server.vercel.app/api/v1/item/${resolvedParams.id}`,
+          `https://petplace-server-3.onrender.com/api/v1/item/${resolvedParams.id}`,
         );
         const data = await res.json();
 
@@ -181,7 +181,7 @@ export default function ItemDetailsPage({
               ? currentItem.category.pet
               : currentItem.category;
           const relatedRes = await fetch(
-            `https://pet-place-server.vercel.app/api/v1/item?category=${categoryName}`,
+            `https://petplace-server-3.onrender.com/api/v1/item?category=${categoryName}`,
           );
           const relatedData = await relatedRes.json();
 
@@ -220,7 +220,7 @@ export default function ItemDetailsPage({
       };
 
       const res = await fetch(
-        "https://pet-place-server.vercel.app/api/v1/cart",
+        "https://petplace-server-3.onrender.com/api/v1/cart",
         {
           method: "POST",
           headers: {

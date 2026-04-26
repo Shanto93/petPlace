@@ -78,7 +78,7 @@ export default function TrendingTreats() {
     const fetchTrendingItems = async () => {
       try {
         const response = await fetch(
-          "https://pet-place-server.vercel.app/api/v1/item",
+          "https://petplace-server-3.onrender.com/api/v1/item",
         );
         const data = await response.json();
 

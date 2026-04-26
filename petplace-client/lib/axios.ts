@@ -9,7 +9,7 @@ declare module "next-auth" {
 }
 
 // Your Express Backend URL
-const BASE_URL = "https://pet-place-server.vercel.app/api/v1";
+const BASE_URL = "https://petplace-server-3.onrender.com/api/v1";
 
 // 1. Public Axios (No Token Required)
 export const axiosPublic = axios.create({
