@@ -112,9 +112,29 @@ export const authOptions: NextAuthOptions = {
       },
     }),
   ],
+  // callbacks: {
+  //   async jwt({ token, user }) {
+  //     // Transfer data from authorize() return to JWT token
+  //     if (user) {
+  //       token.id = user.id;
+  //       token.accessToken = (user as any).accessToken;
+  //       token.needPasswordChange = (user as any).needPasswordChange;
+  //     }
+  //     return token;
+  //   },
+  //   async session({ session, token }) {
+  //     // Transfer data from JWT token to frontend session object
+  //     if (session.user) {
+  //       (session.user as any).id = token.id;
+  //       (session.user as any).needPasswordChange = token.needPasswordChange;
+  //     }
+  //     (session as any).accessToken = token.accessToken;
+
+  //     return session;
+  //   },
+  // },
   callbacks: {
     async jwt({ token, user }) {
-      // Transfer data from authorize() return to JWT token
       if (user) {
         token.id = user.id;
         token.accessToken = (user as any).accessToken;
@@ -123,14 +143,16 @@ export const authOptions: NextAuthOptions = {
       return token;
     },
     async session({ session, token }) {
-      // Transfer data from JWT token to frontend session object
-      if (session.user) {
-        (session.user as any).id = token.id;
-        (session.user as any).needPasswordChange = token.needPasswordChange;
-      }
-      (session as any).accessToken = token.accessToken;
-
-      return session;
+      // 🚨 FIX: Return a completely reconstructed object to bypass production stripping
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          id: token.id as string,
+          needPasswordChange: token.needPasswordChange as boolean,
+        },
+        accessToken: token.accessToken as string,
+      };
     },
   },
   pages: {
