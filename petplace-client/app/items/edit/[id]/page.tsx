@@ -132,7 +132,7 @@ export default function EditItemPage({
 
       const res = await axiosPublic.patch(`/item/${resolvedParams.id}`, body, {
         headers: {
-          "Content-Type": "multipart/form-data",
+          // "Content-Type": "multipart/form-data",
           Authorization: `Bearer ${(session as any)?.accessToken}`,
         },
       });
@@ -286,6 +286,7 @@ export default function EditItemPage({
                         src={src}
                         alt="existing"
                         fill
+                        sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                         className="object-cover"
                       />
                       <button

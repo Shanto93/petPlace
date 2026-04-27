@@ -3,6 +3,7 @@
 
 import { AnimatePresence, motion, Variants } from "framer-motion";
 import {
+  AlertCircle, // Added for the error state UI
   ArrowRight,
   Bird,
   Bone,
@@ -39,7 +40,7 @@ interface Product {
   color: string;
   bg: string;
   images?: string[];
-  category: Category | string; // Handles both populated object and unpopulated ID
+  category: Category | string | null; // Added null for extra safety
 }
 
 // Maps the string from the database to the actual Lucide component
@@ -173,9 +174,10 @@ function ShopContent() {
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get("category") || "All";
 
-  // State for products and loading
+  // State for products, loading, AND errors
   const [products, setProducts] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null); // NEW: Error state
 
   // State for filters
   const [searchTerm, setSearchTerm] = useState("");
@@ -186,16 +188,29 @@ function ShopContent() {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch(
-          "https://petplace-server-3.onrender.com/api/v1/item",
-        );
+        // FIXED: Using an environment variable, falling back to port 5000 for local backend
+        const API_URL =
+          process.env.NEXT_PUBLIC_API_URL ||
+          "https://petplace-server-3.onrender.com";
+        const response = await fetch(`${API_URL}/api/v1/item`);
+
+        // FIXED: Catch 404s and server errors BEFORE trying to parse JSON
+        if (!response.ok) {
+          throw new Error(`Server responded with a ${response.status} status.`);
+        }
+
         const data = await response.json();
 
         if (data.success) {
           setProducts(data.data);
+        } else {
+          throw new Error("Failed to load products from database.");
         }
-      } catch (error) {
-        console.error("Failed to fetch products:", error);
+      } catch (err: any) {
+        console.error("Fetch Error:", err);
+        setError(
+          "We couldn't connect to the server. Please ensure your backend is running.",
+        );
       } finally {
         setIsLoading(false);
       }
@@ -212,9 +227,11 @@ function ShopContent() {
         item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.description.toLowerCase().includes(searchTerm.toLowerCase());
 
-      // Safely extract category name (handles both string and object)
+      // FIXED: Safely extract category name, checking for null to prevent crashes
       const categoryName =
-        typeof item.category === "object" ? item.category.pet : item.category;
+        typeof item.category === "object" && item.category !== null
+          ? item.category.pet
+          : item.category || "Unknown";
 
       const matchesCategory =
         selectedCategory === "All" || categoryName === selectedCategory;
@@ -225,6 +242,7 @@ function ShopContent() {
     });
   }, [products, searchTerm, selectedCategory, maxPrice]);
 
+  // Loading UI
   if (isLoading) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-sky-50/50">
@@ -232,6 +250,19 @@ function ShopContent() {
         <h2 className="text-2xl font-black text-text-charcoal">
           Fetching Treats from Database...
         </h2>
+      </div>
+    );
+  }
+
+  // FIXED: New Error UI
+  if (error) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-sky-50/50 p-6 text-center">
+        <AlertCircle size={60} className="text-red-400 mb-4" />
+        <h2 className="text-3xl font-black text-text-charcoal mb-2">
+          Oops! Something went wrong.
+        </h2>
+        <p className="text-gray-500 font-medium max-w-md">{error}</p>
       </div>
     );
   }
@@ -385,10 +416,13 @@ function ShopContent() {
                 <AnimatePresence>
                   {filteredProducts.map((product) => {
                     const Icon = iconMap[product.icon] || Sparkles;
+
+                    // FIXED: Safe category display
                     const categoryDisplay =
-                      typeof product.category === "object"
+                      typeof product.category === "object" &&
+                      product.category !== null
                         ? product.category.pet
-                        : product.category;
+                        : product.category || "General";
 
                     return (
                       <motion.div
@@ -398,7 +432,7 @@ function ShopContent() {
                         className="bg-white rounded-[2rem] p-5 border-2 border-gray-100 shadow-[0_6px_0_rgba(229,231,235,1)] hover:shadow-[0_10px_0_rgba(135,206,235,0.4)] hover:border-primary-sky/30 hover:-translate-y-2 transition-all duration-300 group flex flex-col h-full"
                       >
                         <div
-                          className={`${product.bg} rounded-[1.5rem] aspect-[4/3] mb-5 flex items-center justify-center border-2 border-transparent group-hover:border-white transition-all relative overflow-hidden`}
+                          className={`${product.bg || "bg-gray-100"} rounded-[1.5rem] aspect-[4/3] mb-5 flex items-center justify-center border-2 border-transparent group-hover:border-white transition-all relative overflow-hidden`}
                         >
                           {/* DYNAMIC IMAGE SLIDER OR FALLBACK ICON */}
                           {product.images && product.images.length > 0 ? (
@@ -413,7 +447,7 @@ function ShopContent() {
                             >
                               <Icon
                                 size={80}
-                                className={`${product.color} drop-shadow-sm group-hover:scale-110 transition-transform duration-300`}
+                                className={`${product.color || "text-gray-400"} drop-shadow-sm group-hover:scale-110 transition-transform duration-300`}
                                 strokeWidth={1.5}
                               />
                             </motion.div>
